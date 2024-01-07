@@ -12,6 +12,8 @@ program_title = "File Guardian"
 end_sign = b"IF_YOU_EDIT_THE_ABOVE_DATA " + bytes([0xFE, 0xEF, 0xFA, 0xCE]) + b"THE_FILE_MAY_NOT_BE_DECRYPTCRY_PROPERLY"
 file_extension = ".fgef"
 
+
+
 def cls():
     os.system("cls")
 

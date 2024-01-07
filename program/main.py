@@ -258,54 +258,59 @@ class mainWindow:
         self.root.mainloop()
 
 def main():
-    root = tk.Tk()
-    app = MenuSelectionWindow(root)
-    root.mainloop()
+    app = QApplication(sys.argv)
+    myWindow = MainMenuWindow()
+    myWindow.show()
+    app.exec_()
 
-    sel_num = app.select_menu_num
+    # root = tk.Tk()
+    # app = MenuSelectionWindow(root)
+    # root.mainloop()
 
-    if sel_num == 1:
-        enc_result = enc_file()
-        
-        if enc_result == 0:
-            print("Encrypted successfully.")
-            messagebox.showinfo(title=program_title, message="Encrypted successfully.")
-        elif enc_result == 1:
-            print("Encryption has been cancelled.")
-            messagebox.showwarning(title=program_title, message="Encryption has been cancelled.")
-        elif enc_result == 2:
-            print("Encryption was canceled because an error occurred.")
-            messagebox.showerror(title=program_title, message="Encryption was canceled because an error occurred.\nPlease try again from the beginning.")
-    
-    elif sel_num == 2:
-        dec_result = dec_file()
-    
-        if dec_result == 0:
-            print("Decrypted successfully.")
-            messagebox.showinfo(title=program_title, message="Decrypted successfully.")
-        elif dec_result == 1:
-            print("Decryption has been cancelled.")
-            messagebox.showwarning(title=program_title, message="Decryption has been cancelled.")
-        elif dec_result == 2:
-            print("Decryption was canceled because an error occurred.")
-            messagebox.showerror(title=program_title, message="Decryption was canceled because an error occurred.\nPlease try again from the beginning.")
-        elif dec_result == 3:
-            print("Please check your password again.")
-            messagebox.showwarning(title=program_title, message="Please check your password again.\nPlease try again from the beginning.")
-        elif dec_result == 4:
-            print("This is not a valid file.")
-            messagebox.showwarning(title=program_title, message="This is not a valid file.\nPlease try again from the beginning.")
-        
-    elif sel_num == 3:
-        exit_result = program_exit()
+    # sel_num = app.select_menu_num
 
-        if exit_result == 1:
-            print("Program exit canceled")
+    # if sel_num == 1:
+    #     enc_result = enc_file()
         
-    else:
-        return 1
+    #     if enc_result == 0:
+    #         print("Encrypted successfully.")
+    #         messagebox.showinfo(title=program_title, message="Encrypted successfully.")
+    #     elif enc_result == 1:
+    #         print("Encryption has been cancelled.")
+    #         messagebox.showwarning(title=program_title, message="Encryption has been cancelled.")
+    #     elif enc_result == 2:
+    #         print("Encryption was canceled because an error occurred.")
+    #         messagebox.showerror(title=program_title, message="Encryption was canceled because an error occurred.\nPlease try again from the beginning.")
     
-    return 0
+    # elif sel_num == 2:
+    #     dec_result = dec_file()
+    
+    #     if dec_result == 0:
+    #         print("Decrypted successfully.")
+    #         messagebox.showinfo(title=program_title, message="Decrypted successfully.")
+    #     elif dec_result == 1:
+    #         print("Decryption has been cancelled.")
+    #         messagebox.showwarning(title=program_title, message="Decryption has been cancelled.")
+    #     elif dec_result == 2:
+    #         print("Decryption was canceled because an error occurred.")
+    #         messagebox.showerror(title=program_title, message="Decryption was canceled because an error occurred.\nPlease try again from the beginning.")
+    #     elif dec_result == 3:
+    #         print("Please check your password again.")
+    #         messagebox.showwarning(title=program_title, message="Please check your password again.\nPlease try again from the beginning.")
+    #     elif dec_result == 4:
+    #         print("This is not a valid file.")
+    #         messagebox.showwarning(title=program_title, message="This is not a valid file.\nPlease try again from the beginning.")
+        
+    # elif sel_num == 3:
+    #     exit_result = program_exit()
+
+    #     if exit_result == 1:
+    #         print("Program exit canceled")
+        
+    # else:
+    #     return 1
+    
+    # return 0
 
 while True:
     main_result = main()

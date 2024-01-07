@@ -57,7 +57,7 @@
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
-     <string>File Encryption</string>
+     <string>menu1</string>
     </property>
    </widget>
    <widget class="QLabel" name="title_label">
@@ -109,7 +109,7 @@
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
-     <string>File Decryption</string>
+     <string>menu2</string>
     </property>
    </widget>
    <widget class="QPushButton" name="menu3_btn">
@@ -125,7 +125,7 @@
      <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
-     <string>Program Exit</string>
+     <string>menu3</string>
     </property>
    </widget>
   </widget>
