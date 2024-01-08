@@ -1,37 +1,232 @@
 import os, json, re, base64
 from cryptography.fernet import Fernet
+from cryptography.fernet import InvalidToken
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.fernet import InvalidToken
+from PyQt5.QtWidgets import QMessageBox
 from tkinter import filedialog
 from tkinter import messagebox
 
 program_title = "File Guardian"
+program_sub_title = "Provides strong encryption capabilities."
 
 end_sign = b"IF_YOU_EDIT_THE_ABOVE_DATA " + bytes([0xFE, 0xEF, 0xFA, 0xCE]) + b"THE_FILE_MAY_NOT_BE_DECRYPTCRY_PROPERLY"
 file_extension = ".fgef"
 
+def enc_file(file_path, file_password, update_progress):
+    """
+    0 = Encryption completed
+    1 = Cancel decryption operation
+    2 = An unknown error occurred
+    3 = This extension cannot be encrypted.
+    """
 
+    global end_sign, program_title
+    program_title_local = (program_title + " - Encryption Func")
 
-def cls():
-    os.system("cls")
+    update_progress(0)
+    
+    # File select
+    print(f"Selected File: {file_path}")
+    update_progress(5)
+    
 
-def pause():
-    os.system("pause")
+    # Check file extension
+    if ("."+get_file_extension(file_path)) == file_extension:
+        update_progress(status="warning")
+        QMessageBox.warning(None, program_title_local, "This extension cannot be encrypted.\nPlease select a file that does not have the [.fgef] extension.")
+        return 3
+    update_progress(10)
 
-def console_dialog():
+    # File data load and task
+    try:
+        ## File data load
+        print("Select File Data Load...")
+        with open(file_path, "rb") as file_read_data:
+            file_data = file_read_data.read()
+        print("Select File Data Load Complit")
+        update_progress(20)
+
+        ## org file name save
+        file_data_json = f'{{"file_name":"{get_filename_from_path(file_path)}"}}'
+        file_data_json = json.loads(file_data_json)
+        update_progress(25)
+
+    except Exception as e:
+        print(f"An unknown error occurred while loading the file: {e}")
+        update_progress(status="error")
+        return 2
+    
+    # password Setting
+    print("Password setting...")
+    file_password_hashed = str_hashing(file_password, str_hashing(file_password, str_hashing(file_password, str_hashing(file_password))))
+    print("Password setted")
+    update_progress(30)
+    
+    # File org data ENC
+    print("File org data Encrypting...")
+    ## Password Key Generate
+    file_enc_key = file_password_hashed
+    encFernet = Fernet(file_enc_key)
+    file_enc_data = encFernet.encrypt(file_data)
+    update_progress(45)
+    ## Memory Delete password, key
+    for i in range(50+1):
+        file_password = Fernet.generate_key()
+        file_enc_key = Fernet.generate_key()
+    print("File org data Encrypted")
+    update_progress(50)
+
+    # File data Combination
+    print("File data Combination...")
+    file_data_json = json.dumps(file_data_json).encode('utf-8')
+    combined_file_data = file_data_json + end_sign + file_enc_data
+    print("File data Combinated")
+    update_progress(65)
+
+    # base64 incoding
+    print("base64 incoding...")
+    combined_file_data_base64_encd = base64.b64encode(combined_file_data)
+    print("base64 incoded")
+    update_progress(80)
+    
+    # File name check
+    print(f"Check file name...")
+    file_save_path = remove_extension(file_path) + file_extension
+    
+    if check_duplicate_file(file_save_path):
+        print("There is a file with the same name in that path")
+        update_progress(status="warning")
+        if QMessageBox.warning(None, program_title_local, f"{file_save_path}\n\nThere is a file with a duplicate name in the path.\nDo you want to overwrite?", QMessageBox.Yes | QMessageBox.No) == QMessageBox.No:
+            file_save_path = get_non_duplicate_filename(file_save_path)
+            if QMessageBox.warning(None, program_title_local, f"{file_save_path}\n\nWould you like to save it with the name above?\nIf you select No, all progress will be cancelled.", QMessageBox.Yes | QMessageBox.No) == QMessageBox.No:
+                return 1
+
+    print(f"File name check completed")
+    update_progress(85)
+
+    # File Save
+    print("File Saving...")
+    try:
+        with open(file_save_path, "wb") as file_write_data:
+            file_write_data.write(combined_file_data_base64_encd)
+    except Exception as e:
+        print(f"An error occurred while saving: {e}")
+        print(f"Please try again from the beginning.")
+        update_progress(status="error")
+        return 2
+    print(f"File Saved: [{file_save_path}]")
+    update_progress(100)
+
+    # task complite
+    print("File encrypting success")
+    return [0, file_save_path]
+    
+def dec_file(file_path, file_password, update_progress):
+    """
+    0 = Decryption completed
+    1 = Cancel decryption operation
+    2 = An unknown error occurred
+    3 = File password incorrect
+    4 = Identifier not found (not the program's encryption method)
+    """
+
+    global program_title
+    program_title_local = (program_title + " - Decryption Func")
+
+    # File select
+    print(f"File selecting...")
+    org_file_path = file_path
+    print(f"Selected File: {org_file_path}")
+
+    # Check file extension
+    if ("."+get_file_extension(org_file_path)) != file_extension:
+        print("incorrect extension")
+        messagebox.showwarning(title=program_title_local, message="This extension cannot be decrypted.")
+        return 1
+
+    # File data extract
+    print("File data extracting...")
+    file_data_extract_data = file_data_extract(org_file_path)
+    if file_data_extract_data == 2:
+        return 2
+    elif file_data_extract_data == 4:
+        return 4
+    
+    try:
+        file_info_data_json = json.loads(file_data_extract_data[0].decode('utf-8'))
+        org_file_data = file_data_extract_data[1]
+        org_file_name = file_info_data_json['file_name']
+    except Exception as e:
+        print(f"An unknown error occurred: {e}")
+        return 2
+    print("File data extracted")
+
+    # org File data dec
+    print("Entering password...")
+    user_input_pw = file_password
+    print("Password entered")
+    
+    ## dec data
+    print("File data Decrypting...")
+    try:
+        file_dec_key = str_hashing(user_input_pw, str_hashing(user_input_pw, str_hashing(user_input_pw, str_hashing(user_input_pw))))
+        decFernet = Fernet(file_dec_key)
+        deced_org_file_data = decFernet.decrypt(org_file_data)
+    except InvalidToken:
+        return 3
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return 2
+    print("File data Decrypted.")
+
+    # save File name check
+    print(f"Check file name...")
+    file_save_path = remove_filename_from_path(org_file_path) + os.sep + org_file_name
+    print(file_save_path)
     while True:
-        try:
-            user_input = input(" (Y/N): ").strip().lower()
-        except KeyboardInterrupt:
-            print("Canceled")
-            return 2
-        
-        if user_input in ['y', 'n']:
-            return True if user_input == 'y' else False
-        else:
-            print("Please enter Y or N.")
+        if not check_validate_file_name(file_save_path):
+            print("Invalid file name")
+            if not messagebox.askokcancel(title=program_title_local, message=f"{file_save_path}\n\nFile name not allowed.\nPlease enter again.\nIf you cancel, all progress will be cancelled."):
+                return 1
+            print("new Save file name input")
+            file_save_path = remove_filename_from_path(org_file_path) + os.sep + input(">> ") + file_extension
+            continue
+        elif check_duplicate_file(file_save_path):
+            print("There is a file with the same name in that path")
+            if not messagebox.askokcancel(title=program_title_local, message=f"{file_save_path}\n\nThere is a file with a duplicate name in the path.\nDo you want to overwrite?"):
+                if not messagebox.askokcancel(title=program_title_local, message=f"{file_save_path}\n\nChange the file name to be saved.\nIf you cancel, all progress will be cancelled."):
+                    return 1
+            else:
+                break
+            print("new Save file name input")
+            file_save_path = remove_filename_from_path(org_file_path) + os.sep + input(">> ") + file_extension
+            continue
+
+        # When there is no problem
+        break
+    print(f"File name check completed")
+
+    # File Save
+    print("File Saving...")
+    try:
+        with open(file_save_path, "wb") as file_write_data:
+            file_write_data.write(deced_org_file_data)
+    except Exception as e:
+        print(f"An error occurred while saving: {e}")
+        print(f"Please try again from the beginning.")
+        return 2
+    print(f"File Saved: [{file_save_path}]")
+    
+    # org File delete
+    ### I don’t think so..
+    # print("deleting org file...")
+    # delete_file(org_file_path)
+
+    # task complit
+    print("File encryption success")
+    return 0
 
 def select_folder():
     global program_title
@@ -59,19 +254,13 @@ def file_select():
         file_path = filedialog.askopenfilename(title=program_title_local)
 
         if file_path == '':
-            if messagebox.askokcancel(title=program_title_local, message="Please select a file."):
-                continue
-            else:
-                return None
+            return None
         
-        if messagebox.askokcancel(title=program_title_local, message=f"{file_path}\nDo you want to continue?"):
-            return file_path
-        else:
-            continue
+        return file_path
 
 def files_select():
     global program_title
-    program_title_local = (program_title + " - File select")
+    program_title_local = (program_title + " - Files select")
 
     while True:
         file_paths = filedialog.askopenfilenames(title=program_title_local)
@@ -104,6 +293,20 @@ def delete_file(file_path):
 def create_folder_if_not_exists(folder_path):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
+
+def get_non_duplicate_filename(file_path):
+    file_dir = remove_filename_from_path(file_path)
+    file_name, file_extension = os.path.splitext(os.path.basename(file_path))
+
+    new_file_path = file_path
+    counter = 0
+
+    while os.path.exists(new_file_path):
+        counter += 1
+        new_file_name = f"{file_name} ({counter}){file_extension}"
+        new_file_path = os.path.join(file_dir, new_file_name)
+
+    return new_file_path
 
 def check_duplicate_file(file_path):
     if os.path.exists(file_path):
