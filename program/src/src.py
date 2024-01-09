@@ -11,7 +11,7 @@ from tkinter import messagebox
 program_title = "File Guardian"
 program_sub_title = "Provides strong encryption capabilities."
 
-end_sign = b"IF_YOU_EDIT_THE_ABOVE_DATA " + bytes([0xFE, 0xEF, 0xFA, 0xCE]) + b"THE_FILE_MAY_NOT_BE_DECRYPTCRY_PROPERLY"
+file_identifier = b"IF_YOU_EDIT_THE_ABOVE_DATA " + bytes([0xFE, 0xEF, 0xFA, 0xCE]) + b"THE_FILE_MAY_NOT_BE_DECRYPTCRY_PROPERLY"
 file_extension = ".fgef"
 
 def enc_file(file_path, file_password, update_progress):
@@ -22,7 +22,7 @@ def enc_file(file_path, file_password, update_progress):
     3 = This extension cannot be encrypted.
     """
 
-    global end_sign, program_title
+    global file_identifier, program_title
     program_title_local = (program_title + " - Encryption Func")
 
     update_progress(0)
@@ -35,7 +35,6 @@ def enc_file(file_path, file_password, update_progress):
     # Check file extension
     if ("."+get_file_extension(file_path)) == file_extension:
         update_progress(status="warning")
-        QMessageBox.warning(None, program_title_local, "This extension cannot be encrypted.\nPlease select a file that does not have the [.fgef] extension.")
         return 3
     update_progress(10)
 
@@ -81,7 +80,7 @@ def enc_file(file_path, file_password, update_progress):
     # File data Combination
     print("File data Combination...")
     file_data_json = json.dumps(file_data_json).encode('utf-8')
-    combined_file_data = file_data_json + end_sign + file_enc_data
+    combined_file_data = file_data_json + file_identifier + file_enc_data
     print("File data Combinated")
     update_progress(65)
 
@@ -138,21 +137,25 @@ def dec_file(file_path, file_password, update_progress):
     # File select
     print(f"File selecting...")
     org_file_path = file_path
+    update_progress(5)
     print(f"Selected File: {org_file_path}")
 
     # Check file extension
     if ("."+get_file_extension(org_file_path)) != file_extension:
-        print("incorrect extension")
-        messagebox.showwarning(title=program_title_local, message="This extension cannot be decrypted.")
-        return 1
+        update_progress(status="wawrning")
+        return 4
+    update_progress(10)
 
     # File data extract
     print("File data extracting...")
     file_data_extract_data = file_data_extract(org_file_path)
     if file_data_extract_data == 2:
+        update_progress(status="error")
         return 2
     elif file_data_extract_data == 4:
+        update_progress(status="warning")
         return 4
+    update_progress(50)
     
     try:
         file_info_data_json = json.loads(file_data_extract_data[0].decode('utf-8'))
@@ -160,12 +163,15 @@ def dec_file(file_path, file_password, update_progress):
         org_file_name = file_info_data_json['file_name']
     except Exception as e:
         print(f"An unknown error occurred: {e}")
+        update_progress(status="error")
         return 2
+    update_progress(60)
     print("File data extracted")
 
     # org File data dec
     print("Entering password...")
     user_input_pw = file_password
+    update_progress(65)
     print("Password entered")
     
     ## dec data
@@ -175,38 +181,29 @@ def dec_file(file_path, file_password, update_progress):
         decFernet = Fernet(file_dec_key)
         deced_org_file_data = decFernet.decrypt(org_file_data)
     except InvalidToken:
+        update_progress(status="warning")
         return 3
     except Exception as e:
         print(f"An error occurred: {e}")
+        update_progress(status="error")
         return 2
+    update_progress(90)
     print("File data Decrypted.")
 
     # save File name check
     print(f"Check file name...")
     file_save_path = remove_filename_from_path(org_file_path) + os.sep + org_file_name
-    print(file_save_path)
-    while True:
-        if not check_validate_file_name(file_save_path):
-            print("Invalid file name")
-            if not messagebox.askokcancel(title=program_title_local, message=f"{file_save_path}\n\nFile name not allowed.\nPlease enter again.\nIf you cancel, all progress will be cancelled."):
+    
+    if check_duplicate_file(file_save_path):
+        print("There is a file with the same name in that path")
+        update_progress(status="warning")
+        if QMessageBox.warning(None, program_title_local, f"{file_save_path}\n\nThere is a file with a duplicate name in the path.\nDo you want to overwrite?", QMessageBox.Yes | QMessageBox.No) == QMessageBox.No:
+            file_save_path = get_non_duplicate_filename(file_save_path)
+            if QMessageBox.warning(None, program_title_local, f"{file_save_path}\n\nWould you like to save it with the name above?\nIf you select No, all progress will be cancelled.", QMessageBox.Yes | QMessageBox.No) == QMessageBox.No:
                 return 1
-            print("new Save file name input")
-            file_save_path = remove_filename_from_path(org_file_path) + os.sep + input(">> ") + file_extension
-            continue
-        elif check_duplicate_file(file_save_path):
-            print("There is a file with the same name in that path")
-            if not messagebox.askokcancel(title=program_title_local, message=f"{file_save_path}\n\nThere is a file with a duplicate name in the path.\nDo you want to overwrite?"):
-                if not messagebox.askokcancel(title=program_title_local, message=f"{file_save_path}\n\nChange the file name to be saved.\nIf you cancel, all progress will be cancelled."):
-                    return 1
-            else:
-                break
-            print("new Save file name input")
-            file_save_path = remove_filename_from_path(org_file_path) + os.sep + input(">> ") + file_extension
-            continue
-
-        # When there is no problem
-        break
+    
     print(f"File name check completed")
+    update_progress(95)
 
     # File Save
     print("File Saving...")
@@ -216,8 +213,10 @@ def dec_file(file_path, file_password, update_progress):
     except Exception as e:
         print(f"An error occurred while saving: {e}")
         print(f"Please try again from the beginning.")
+        update_progress(status="error")
         return 2
     print(f"File Saved: [{file_save_path}]")
+    update_progress(100)
     
     # org File delete
     ### I don’t think so..
@@ -226,7 +225,7 @@ def dec_file(file_path, file_password, update_progress):
 
     # task complit
     print("File encryption success")
-    return 0
+    return [0, file_save_path]
 
 def select_folder():
     global program_title
@@ -335,22 +334,25 @@ def get_file_extension(file_path):
     return file_extension
 
 def file_data_extract(file_path):
-    global end_sign
-    
+    global file_identifier
     try:
         with open(file_path, 'rb') as file_data:
             data = file_data.read()
 
             # base64 decode
+            print("base64 decoding...")
             data = base64.b64decode(data)
+            print("base64 decoded")
             
-            index = data.find(end_sign)
+            print("Finding identifier...")
+            index = data.find(file_identifier)
             if index != -1:
                 data_after_sign = data[:index]
-                data_before_sign = data[index + len(end_sign):]
+                data_before_sign = data[index + len(file_identifier):]
+                print("Identifier Finded")
                 return (data_after_sign, data_before_sign)
             else:
-                print("End sign not found in the file data")
+                print("The identifier was not found in the file data.")
                 return 4
 
     except Exception as e:
@@ -359,7 +361,7 @@ def file_data_extract(file_path):
 
 def check_valid_password(input_string):
     min_len = 1
-    max_len = 512
+    max_len = 65536
     regex   = r'^[a-zA-Z0-9!@#$%^&*()-_=+[\]{};:\'",.<>/?\\|`~]*$'
     
     if min_len > len(input_string):

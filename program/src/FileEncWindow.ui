@@ -21,42 +21,6 @@
     <normaloff>icon/icon.png</normaloff>icon/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="title_label">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>18</y>
-      <width>481</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-      <kerning>true</kerning>
-     </font>
-    </property>
-    <property name="cursor">
-     <cursorShape>ArrowCursor</cursorShape>
-    </property>
-    <property name="mouseTracking">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>program_title</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-    <property name="margin">
-     <number>10</number>
-    </property>
-   </widget>
    <widget class="QPushButton" name="file_enc_btn">
     <property name="geometry">
      <rect>
@@ -310,8 +274,43 @@
      <string>&lt; Back</string>
     </property>
    </widget>
+   <widget class="QLabel" name="title_label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>481</width>
+      <height>50</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+      <kerning>true</kerning>
+     </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
+    </property>
+    <property name="mouseTracking">
+     <bool>false</bool>
+    </property>
+    <property name="text">
+     <string>program_title</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="margin">
+     <number>10</number>
+    </property>
+   </widget>
    <zorder>progress_bar</zorder>
-   <zorder>title_label</zorder>
    <zorder>file_enc_btn</zorder>
    <zorder>file_select_label</zorder>
    <zorder>file_select_btn</zorder>
@@ -319,6 +318,7 @@
    <zorder>pw_cf_entry</zorder>
    <zorder>check_box</zorder>
    <zorder>back_btn</zorder>
+   <zorder>title_label</zorder>
   </widget>
  </widget>
  <resources/>

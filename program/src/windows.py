@@ -1,9 +1,8 @@
 from src import src
 import os
 from tkinterdnd2 import *
-from tkinter import messagebox
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QProgressBar
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QProgressBar
 from PyQt5.QtCore import Qt, QUrl, QFileInfo
 from PyQt5.QtGui import QDesktopServices, QDragEnterEvent, QDropEvent
 
@@ -54,7 +53,9 @@ class FileDecWindow(QMainWindow):
             print("Decryption was canceled because no identifier was found in the file (the program was not decrypting the file).")
             QMessageBox.warning(self, src.program_title, f"No identifier found in file.\nCheck whether the file is encrypted with [{src.program_title}].")
 
-            pass
+        elif dec_result == 4:
+            print("This extension does not support decryption.")
+            QMessageBox.warning(self, src.program_title, f"This extension does not support decryption.\nPlease select a file with the [{src.file_extension}] extension.")
         elif dec_result == 3:
             print("Decryption was canceled because the file password was incorrect.")
             QMessageBox.critical(self, src.program_title, "The file password is incorrect.\nPlease check the file password and re-enter it.")
@@ -100,6 +101,7 @@ class FileDecWindow(QMainWindow):
         self.ui.progress_bar.setEnabled(not activate)
 
     def update_progress(self, value: int = None, status: str = "normal"):
+        status = status.lower()
         if status == "normal":
             self.ui.progress_bar.setStyleSheet("QProgressBar::chunk { background-color: green; }")
         elif status == "warning":
@@ -229,6 +231,7 @@ class FileEncWindow(QMainWindow):
 
         if enc_result == 3:
             print("Encryption was canceled because the extension was incorrect.")
+            QMessageBox.warning(self, src.program_title, f"This extension cannot be encrypted.\nPlease select a file that does not have the [{src.file_extension}] extension.")
         elif enc_result == 2:
             print("Encryption canceled due to error")
             QMessageBox.critical(self, src.program_title, "An unknown error occurred during encryption.\nPlease try again from the beginning.")
