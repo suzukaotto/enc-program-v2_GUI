@@ -24,6 +24,12 @@ def main():
             FileDecClass = FileDecWindow()
             FileDecClass.show()
             QApp.exec_()
+        
+        elif MainMenuClass.select_menu_num == 3:
+            # About Page
+            AboutClass = AboutWindow()
+            AboutClass.show()
+            QApp.exec_()
 
         MainMenuClass.select_menu_num == None
 

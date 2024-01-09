@@ -9,6 +9,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 
 program_title = "File Guardian"
+program_version = "2.0"
 program_sub_title = "Provides strong encryption capabilities."
 
 file_identifier = b"IF_YOU_EDIT_THE_ABOVE_DATA " + bytes([0xFE, 0xEF, 0xFA, 0xCE]) + b"THE_FILE_MAY_NOT_BE_DECRYPTCRY_PROPERLY"

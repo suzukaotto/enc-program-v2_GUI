@@ -384,7 +384,8 @@ class MainMenuWindow(QMainWindow):
         self.menu1_btn.clicked.connect(self.menu1BtnClick)
         self.menu2_btn.clicked.connect(self.menu2BtnClick)
         self.menu3_btn.clicked.connect(self.menu3BtnClick)
-        self.action_github.triggered.connect(self.githubActionClick)
+        self.aboutAction.triggered.connect(self.aboutActionClick)
+        self.githubAction.triggered.connect(self.githubActionClick)
 
         self.message_box = None
         self.select_menu_num = None
@@ -405,6 +406,11 @@ class MainMenuWindow(QMainWindow):
         self.select_menu_num = None
         self.close()
     
+    def aboutActionClick(self) -> None:
+        print(f"Move to About Page..")
+        self.select_menu_num = 3
+        self.close()
+        
     def githubActionClick(self) -> None:
         open_url = "https://github.com/suzukaotto/enc-program-v2_GUI"
         QDesktopServices.openUrl(QUrl(open_url))
@@ -423,3 +429,19 @@ class MainMenuWindow(QMainWindow):
         else:
             event.ignore()
             print("Program Exit Canceled")
+
+
+class AboutWindow(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.ui = uic.loadUi("program/src/AboutWindow.ui", self)
+        
+        self.setWindowTitle(src.program_title)
+        self.title_label.setText(src.program_title)
+        self.sub_title_label.setText(src.program_sub_title)
+        self.ver_title_label.setText(src.program_version)
+        
+        self.confirm_btn.clicked.connect(self.confirm_btn_clicked)
+    
+    def confirm_btn_clicked(self):
+        self.close()
