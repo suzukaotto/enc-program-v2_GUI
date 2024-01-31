@@ -1,5 +1,4 @@
 # File Guardian
-Still in production...
 ## How to start
 ### Enter command
 1. Install External library
