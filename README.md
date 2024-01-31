@@ -10,7 +10,7 @@ pip install -r requirements.txt
 ```
 python program/main.py
 ```
-## Version
+## Requirements
 ### Python
 | Name | Version |
 |-------------|-------------|
