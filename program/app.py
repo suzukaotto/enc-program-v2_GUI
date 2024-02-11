@@ -1,8 +1,16 @@
-from src.windows import *
-from src.src import *
-
 import sys
-from PyQt5.QtWidgets import QApplication
+
+try:
+    from src.windows import *
+    from src.src import *
+except:
+    sys.exit("windows, src module not found.")
+
+try:
+    from PyQt5.QtWidgets import QApplication
+except:
+    sys.exit("PyQt5 module not found.")
+
 
 def main():
     QApp = QApplication(sys.argv)

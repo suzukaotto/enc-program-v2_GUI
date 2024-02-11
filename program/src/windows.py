@@ -1,18 +1,110 @@
-from src import src
-import os
-from tkinterdnd2 import *
-from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QProgressBar
-from PyQt5.QtCore import Qt, QUrl, QFileInfo
-from PyQt5.QtGui import QDesktopServices, QDragEnterEvent, QDropEvent
+import os, sys
 
-github_icon = "program\src\icon\github.png"
-program_icon = "program\src\icon\icon.png"
+try:
+    from src import src
+except:
+    sys.exit("src module not found.")
+
+try:
+    from tkinterdnd2 import *
+except:
+    sys.exit("tkinterdnd2 module not found.")
+
+try:
+    from PyQt5 import uic
+    from PyQt5.QtWidgets import QMainWindow, QMessageBox, QProgressBar
+    from PyQt5.QtCore import Qt, QUrl, QFileInfo
+    from PyQt5.QtGui import QDesktopServices, QDragEnterEvent, QDropEvent
+except:
+    sys.exit("PyQt5 module not found.")
+
+
+github_icon  = "program/src/icon/github.png"
+program_icon = "program/src/icon/icon.png"
+
+main_menu_window_path = "program/src/MainMenuWindow.ui"
+about_window_path     = "program/src/AboutWindow.ui"
+file_dec_window_path  = "program/src/FileDecWindow.ui"
+file_enc_window_path  = "program/src/FileEncWindow.ui"
+
+class MainMenuWindow(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.ui = uic.loadUi(main_menu_window_path, self)
+        
+        self.setWindowTitle(src.program_title)
+        self.title_label.setText(src.program_title)
+        self.sub_title_label.setText(src.program_sub_title)
+        
+        self.menu1_btn.clicked.connect(self.menu1BtnClick)
+        self.menu2_btn.clicked.connect(self.menu2BtnClick)
+        self.menu3_btn.clicked.connect(self.menu3BtnClick)
+        self.aboutAction.triggered.connect(self.aboutActionClick)
+        self.githubAction.triggered.connect(self.githubActionClick)
+
+        self.message_box = None
+        self.select_menu_num = None
+
+
+    def menu1BtnClick(self) -> None:
+        print(f"Move to File Encrypting Page..")
+        self.select_menu_num = 1
+        self.close()
+        
+    def menu2BtnClick(self) -> None:
+        print(f"Move to File Decrypting Page..")
+        self.select_menu_num = 2
+        self.close()
+
+    def menu3BtnClick(self) -> None:
+        print(f"Program Exiting...")
+        self.select_menu_num = None
+        self.close()
+    
+    def aboutActionClick(self) -> None:
+        print(f"Move to About Page..")
+        self.select_menu_num = 3
+        self.close()
+        
+    def githubActionClick(self) -> None:
+        open_url = "https://github.com/suzukaotto/enc-program-v2_GUI"
+        QDesktopServices.openUrl(QUrl(open_url))
+        print("github page opened")
+    
+    def closeEvent(self, event):
+        if self.select_menu_num != None:
+            self.close()
+            return
+        
+        reply = QMessageBox.question(self, src.program_title, 'Are you sure you want to quit the program?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.close()
+            print("Program Exted")
+            exit(0)
+        else:
+            event.ignore()
+            print("Program Exit Canceled")
+
+
+class AboutWindow(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
+        self.ui = uic.loadUi(about_window_path, self)
+        
+        self.setWindowTitle(src.program_title)
+        self.title_label.setText(src.program_title)
+        self.sub_title_label.setText(src.program_sub_title)
+        self.ver_title_label.setText(src.program_version)
+        
+        self.confirm_btn.clicked.connect(self.confirm_btn_clicked)
+    
+    def confirm_btn_clicked(self):
+        self.close()
 
 class FileDecWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = uic.loadUi("program/src/FileDecWindow.ui", self)
+        self.ui = uic.loadUi(file_dec_window_path, self)
 
         self.setWindowTitle(src.program_title)
         self.ui.title_label.setText("File Decryption")
@@ -177,7 +269,7 @@ class FileDecWindow(QMainWindow):
 class FileEncWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = uic.loadUi("program/src/FileEncWindow.ui", self)
+        self.ui = uic.loadUi(file_enc_window_path, self)
 
         self.setWindowTitle(src.program_title)
         self.ui.title_label.setText("File Encryption")
@@ -371,77 +463,3 @@ class FileEncWindow(QMainWindow):
             event.ignore()
             print("File Encryption window exit canceled")
 
-
-class MainMenuWindow(QMainWindow):
-    def __init__(self) -> None:
-        super().__init__()
-        self.ui = uic.loadUi("program/src/MainMenuWindow.ui", self)
-        
-        self.setWindowTitle(src.program_title)
-        self.title_label.setText(src.program_title)
-        self.sub_title_label.setText(src.program_sub_title)
-        
-        self.menu1_btn.clicked.connect(self.menu1BtnClick)
-        self.menu2_btn.clicked.connect(self.menu2BtnClick)
-        self.menu3_btn.clicked.connect(self.menu3BtnClick)
-        self.aboutAction.triggered.connect(self.aboutActionClick)
-        self.githubAction.triggered.connect(self.githubActionClick)
-
-        self.message_box = None
-        self.select_menu_num = None
-
-
-    def menu1BtnClick(self) -> None:
-        print(f"Move to File Encrypting Page..")
-        self.select_menu_num = 1
-        self.close()
-        
-    def menu2BtnClick(self) -> None:
-        print(f"Move to File Decrypting Page..")
-        self.select_menu_num = 2
-        self.close()
-
-    def menu3BtnClick(self) -> None:
-        print(f"Program Exiting...")
-        self.select_menu_num = None
-        self.close()
-    
-    def aboutActionClick(self) -> None:
-        print(f"Move to About Page..")
-        self.select_menu_num = 3
-        self.close()
-        
-    def githubActionClick(self) -> None:
-        open_url = "https://github.com/suzukaotto/enc-program-v2_GUI"
-        QDesktopServices.openUrl(QUrl(open_url))
-        print("github page opened")
-    
-    def closeEvent(self, event):
-        if self.select_menu_num != None:
-            self.close()
-            return
-        
-        reply = QMessageBox.question(self, src.program_title, 'Are you sure you want to quit the program?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            self.close()
-            print("Program Exted")
-            exit(0)
-        else:
-            event.ignore()
-            print("Program Exit Canceled")
-
-
-class AboutWindow(QMainWindow):
-    def __init__(self) -> None:
-        super().__init__()
-        self.ui = uic.loadUi("program/src/AboutWindow.ui", self)
-        
-        self.setWindowTitle(src.program_title)
-        self.title_label.setText(src.program_title)
-        self.sub_title_label.setText(src.program_sub_title)
-        self.ver_title_label.setText(src.program_version)
-        
-        self.confirm_btn.clicked.connect(self.confirm_btn_clicked)
-    
-    def confirm_btn_clicked(self):
-        self.close()

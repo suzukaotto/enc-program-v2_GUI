@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>icon/icon.png</normaloff>icon/icon.png</iconset>
+  </property>
   <widget class="QPushButton" name="confirm_btn">
    <property name="geometry">
     <rect>
